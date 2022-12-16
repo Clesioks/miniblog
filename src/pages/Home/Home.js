@@ -1,33 +1,44 @@
 import React, { useState } from 'react';
 import styles from './Home.module.css';
 
+// hooks
+import { useNavigate, Link } from 'react-router-dom';
+import { useFetchDocuments } from '../../hooks/useFetchDocuments';
+
+// components
+import PostDetail from '../../components/PostDetail';
+
 const Home = () => {
-  const [lista, setLista] = useState(['comida']);
+  const [query, setQuery] = useState('');
+  const { documents: posts, loading } = useFetchDocuments('posts');
 
-  let onRemove = (removeItem) => {
-    setLista((prev) => prev.filter((i) => i !== removeItem));
-  };
-
-  const handleSub = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    setLista((prev) => [...prev, e.target.newItem.value]);
   };
 
   return (
-    <div>
-      <h1>Home</h1>
-      <form onSubmit={handleSub}>
-        <input name="newItem" />
+    <div className={styles.home}>
+      <h1>Veja os nossos posts mais recentes</h1>
+      <form onSubmit={handleSubmit} className={styles.search_form}>
+        <input
+          type="text"
+          placeholder="Ou busque por tags"
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <button className="btn btn-dark">Pesquisar</button>
       </form>
-      <ul>
-        {lista.map((item) => (
-          <li key={item}>
-            {item}
-            <button onClick={() => onRemove(item)}>X</button>
-          </li>
-        ))}
-      </ul>
+      <div>
+        {loading && <p>Carregando...</p>}
+        {posts && posts.map((post) => <PostDetail key={post.id} post={post} />)}
+        {posts && posts.length === 0 && (
+          <div className={styles.noposts}>
+            <p>Não foram encontrados posts</p>
+            <Link to="/posts/create" className="btn">
+              Criar primeiro post
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
