@@ -15,7 +15,26 @@ export const useFetchDocument = (docCollection, id) => {
       if (cancelled) return;
 
       setLoading(true);
+
+      try {
+        const docRef = await doc(db, docCollection, id);
+        const docSnap = await getDoc(docRef);
+
+        setDocument(docSnap.data());
+        setLoading(false);
+      } catch (error) {
+        console.log(error);
+        setError(error.message);
+
+        setLoading(false);
+      }
     }
     loadDocument();
-  }, [docCollection, search, uid, cancelled]);
+  }, [docCollection, id, cancelled]);
+
+  useEffect(() => {
+    return () => setCancelled(true);
+  }, []);
+
+  return { document, loading, error };
 };
